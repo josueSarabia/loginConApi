@@ -21,9 +21,26 @@ class SingUpState extends State<SingUp> {
   // not a GlobalKey<MyCustomFormState>.
   final _formKey = GlobalKey<FormState>();
 
-  String user;
+ 
   String password;
-
+  String username;
+  String name;
+  String email;
+  _buildDialog( context,title, error){
+    showDialog(
+      barrierDismissible: true,
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+         
+        shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(20.0)), //this right here
+        title: Text(title),
+        content: Text(error),
+        );
+  });
+  }
   @override
   Widget build(BuildContext context) {
     // Build a Form widget using the _formKey created above.
@@ -39,10 +56,44 @@ class SingUpState extends State<SingUp> {
                     TextFormField(
                       // The validator receives the text that the user has entered.
                       decoration: const InputDecoration(
-                        labelText: 'User',
+                        icon: Icon(Icons.account_circle),
+                        labelText: 'Name',
                       ),
                       validator: (value) {
-                        this.user = value;
+                        this.name = value;
+                        if (value.isEmpty) {
+                          return 'Please enter some text';
+                        }
+                        print(value);
+                        model.setUser(value);
+                        return null;
+                      },
+                    ),
+                    TextFormField(
+                      // The validator receives the text that the user has entered.
+                      decoration: const InputDecoration(
+                         icon: Icon(Icons.people),
+                        labelText: 'User name',
+                      ),
+                      validator: (value) {
+                        this.username = value;
+                        if (value.isEmpty) {
+                          return 'Please enter some text';
+                        }
+                        print(value);
+                        model.setUser(value);
+                        return null;
+                      },
+                    ),
+                     TextFormField(
+                       keyboardType: TextInputType.emailAddress,
+                      // The validator receives the text that the user has entered.
+                      decoration: const InputDecoration(
+                         icon: Icon(Icons.email),
+                        labelText: 'Email',
+                      ),
+                      validator: (value) {
+                        this.email = value;
                         if (value.isEmpty) {
                           return 'Please enter some text';
                         }
@@ -54,6 +105,7 @@ class SingUpState extends State<SingUp> {
                     TextFormField(
                       obscureText: true,
                       decoration: const InputDecoration(
+                        icon: Icon(Icons.lock),
                         labelText: 'Password',
                       ),
                       validator: (value){
@@ -74,8 +126,15 @@ class SingUpState extends State<SingUp> {
                           // you'd often call a server or save the information in a database.
                           /*Scaffold.of(context)
                     .showSnackBar(SnackBar(content: Text('Processing Data')));*/
-                          model.dataUser(this.user,this.password);
-                          Navigator.pop(context);
+                         model.dataUser(email: email,username: username,name: name,password: password).then((model) async {
+       Navigator.pop(context);
+}).catchError((error) {
+        return _buildDialog(context, "Error", error.toString());
+}).timeout(Duration(seconds: 10), onTimeout: () {
+        return _buildDialog(context, "Error", "Timeout > 10secs");
+});
+
+                         
                         }
                       },
                       child: Text('Submit'),

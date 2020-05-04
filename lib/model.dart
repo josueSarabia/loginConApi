@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Model extends ChangeNotifier {
-  bool _logged ;
-  String _user;
-  String _password;
+  bool logged = false;
+  String token;
+  String username;
+  String name;
+  String email;
+  Model(this.logged, {this.token, this.username, this.name, this.email});
 
-  
-  Model(bool logged) {
-    _logged = logged; 
-  }
-
-  Future<String> getUser() async{
+  Future<String> getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('user') ?? '';
   }
 
-  Future<void> setUser(String user) async{
+  Future<void> setUser(String user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('user', user);
   }
@@ -41,20 +41,50 @@ class Model extends ChangeNotifier {
     await prefs.setBool('logged', logged);
   }
 
-  void dataUser(String user, String password){
-    _user = user;
-    _password = password;
-    _logged = !_logged;
-    setState(_logged);
-    setUser(_user);
-    setPassword(_password);
-    notifyListeners();
+  Future<Model> dataUser(
+      {String email, String password, String username, String name}) async {
+    final http.Response response = await http.post(
+      'https://movil-api.herokuapp.com/signup',
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'email': email,
+        'password': password,
+        'username': username,
+        'name': name
+      }),
+    );
+
+    print('${response.body}');
+    print('${response.statusCode}');
+    if (response.statusCode == 200) {
+      this.logged=true;
+      print('${response.body}');
+      setState(true);
+      setUser(username);
+      setPassword(password);
+      notifyListeners();
+      return Model.fromJson(json.decode(response.body));
+    } else {
+      print("signup failed");
+      print('${response.body}');
+      return throw Exception(response.body);
+    }
   }
 
-  void changeValue(){
-    _logged = !_logged;
-    print(_logged);
-    setState(_logged);
+  factory Model.fromJson(Map<String, dynamic> json) {
+    return Model(
+      true,
+      token: json['token'],
+      username: json['username'],
+      name: json['name'],
+    );
+  }
+  void changeValue() {
+    this.logged = !this.logged;
+    print(this.logged);
+    setState(this.logged);
     notifyListeners();
   }
 }
