@@ -28,7 +28,7 @@ class SingUpState extends State<SingUp> {
   String email;
   _buildDialog( context,title, error){
     showDialog(
-      barrierDismissible: true,
+      barrierDismissible: false,
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
@@ -119,15 +119,16 @@ class SingUpState extends State<SingUp> {
                       },
                     ),
                     RaisedButton(
-                      onPressed: () {
+                      onPressed: ()   {
                         // Validate returns true if the form is valid, otherwise false.
                         if (_formKey.currentState.validate()) {
                           // If the form is valid, display a snackbar. In the real world,
                           // you'd often call a server or save the information in a database.
                           /*Scaffold.of(context)
                     .showSnackBar(SnackBar(content: Text('Processing Data')));*/
-                         model.dataUser(email: email,username: username,name: name,password: password).then((model) async {
-       Navigator.pop(context);
+                          model.dataUser(email: email,username: username,name: name,password: password).then((model)   {
+     
+       print("creado");
 }).catchError((error) {
         return _buildDialog(context, "Error", error.toString());
 }).timeout(Duration(seconds: 10), onTimeout: () {

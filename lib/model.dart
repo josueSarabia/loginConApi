@@ -61,15 +61,14 @@ class Model extends ChangeNotifier {
     if (response.statusCode == 200) {
       this.logged=true;
       print('${response.body}');
-      setState(true);
+      setState(false);
       setUser(username);
       setPassword(password);
       notifyListeners();
       return Model.fromJson(json.decode(response.body));
-    } else {
-      print("signup failed");
-      print('${response.body}');
-      return throw Exception(response.body);
+    } else {   
+      print("hola");  
+        return throw  ( json.decode(response.body)['error']);
     }
   }
 
