@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:calculadoranotifier/model.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:calculadoranotifier/widgets/singup.dart';
+import 'dart:convert';
 
 // Define a custom Form widget.
 class SingIn extends StatefulWidget {
@@ -22,7 +24,21 @@ class SingInState extends State<SingIn> {
   final _formKey = GlobalKey<FormState>();
   String user;
   String password;
-
+ _buildDialog( context,title, error){
+    showDialog(
+      barrierDismissible: false,
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+         
+        shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(20.0)), //this right here
+        title: Text(title),
+        content: Text(error),
+        );
+  });
+  }
   @override
   Widget build(BuildContext context) {
     // Build a Form widget using the _formKey created above.
@@ -38,18 +54,15 @@ class SingInState extends State<SingIn> {
                 TextFormField(
                   // The validator receives the text that the user has entered.
                   decoration: const InputDecoration(
-                    labelText: 'User',
+                    labelText: 'Email',
+                    icon: Icon(Icons.email),
                   ),
                   validator: (value) {
-                    model.getUser().then((user) {
+                   
                       this.user = value;
                       if (value.isEmpty) {
                         return 'Please enter some text';
-                      } else if (this.user != user) {
-                        return 'Invalid Credentials';
-                      }
-                      return null;
-                    });
+                      } 
 
                     return null;
                   },
@@ -58,17 +71,14 @@ class SingInState extends State<SingIn> {
                   obscureText: true,
                   decoration: const InputDecoration(
                     labelText: 'Password',
+                    icon: Icon(Icons.lock),
                   ),
                   validator: (value) {
-                    model.getPassword().then((pass) {
+                    
                       this.password = value;
                       if (value.trim().isEmpty) {
                         return 'Password is required';
-                      } else if (this.password != pass) {
-                        return 'Invalid Credentials';
-                      } 
-                      return null;
-                    });
+                      }  
 
                     return null;
                   },
@@ -77,15 +87,25 @@ class SingInState extends State<SingIn> {
                   onPressed: () async {
                     // Validate returns true if the form is valid, otherwise false.
                     if (_formKey.currentState.validate()) {
-                      // If the form is valid, display a snackbar. In the real world,
-                      // you'd often call a server or save the information in a database.
-                      /*Scaffold.of(context)
-                    .showSnackBar(SnackBar(content: Text('Processing Data')));*/
+                      final http.Response response = await http.post(
+      'https://movil-api.herokuapp.com/signin',
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'email': user,'password': password}),
+    );
+
                       String userStorage = await model.getUser();
                       String passwordStorage = await model.getPassword();
-                      if (this.password == passwordStorage &&
-                          this.user == userStorage) {
-                        model.changeValue();
+                      if (response.statusCode == 200) {
+                        model.email=user;
+                      
+                        model.login(json.decode(response.body)['token'],json.decode(response.body)['username']);
+                      
+                      }else{
+                        _buildDialog(context, "Error credenciales", json.decode(response.body)['error']);
+
                       }
                     }
                   },

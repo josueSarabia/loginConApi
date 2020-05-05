@@ -10,6 +10,14 @@ class Model extends ChangeNotifier {
   String name;
   String email;
   Model(this.logged, {this.token, this.username, this.name, this.email});
+  Future <void> login(token,username) async{
+    this.token=token;
+    this.username=username;
+    this.logged=true;
+     setState(true);
+      setUser(this.username);  
+      notifyListeners();
+  }
 
   Future<String> getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -41,6 +49,7 @@ class Model extends ChangeNotifier {
     await prefs.setBool('logged', logged);
   }
 
+
   Future<Model> dataUser(
       {String email, String password, String username, String name}) async {
     final http.Response response = await http.post(
@@ -67,7 +76,7 @@ class Model extends ChangeNotifier {
       notifyListeners();
       return Model.fromJson(json.decode(response.body));
     } else {   
-      print("hola");  
+      
         return throw  ( json.decode(response.body)['error']);
     }
   }
@@ -82,6 +91,7 @@ class Model extends ChangeNotifier {
   }
   void changeValue() {
     this.logged = !this.logged;
+     
     print(this.logged);
     setState(this.logged);
     notifyListeners();
