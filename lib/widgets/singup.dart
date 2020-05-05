@@ -129,6 +129,7 @@ class SingUpState extends State<SingUp> {
                           model.dataUser(email: email,username: username,name: name,password: password).then((model)   {
      
        print("creado");
+       Navigator.pop(context);
 }).catchError((error) {
         return _buildDialog(context, "Error", error.toString());
 }).timeout(Duration(seconds: 10), onTimeout: () {

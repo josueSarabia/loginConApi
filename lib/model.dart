@@ -61,7 +61,7 @@ class Model extends ChangeNotifier {
     if (response.statusCode == 200) {
       this.logged=true;
       print('${response.body}');
-      setState(false);
+      setState(true);
       setUser(username);
       setPassword(password);
       notifyListeners();

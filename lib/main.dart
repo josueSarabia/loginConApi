@@ -4,6 +4,8 @@ import 'package:calculadoranotifier/model.dart';
 import 'package:calculadoranotifier/widgets/sigin.dart';
 import 'package:calculadoranotifier/widgets/home.dart';
 
+import 'widgets/home.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -27,7 +29,7 @@ class MyApp extends StatelessWidget {
           // alternatively use snapshot.connectionState != ConnectionState.done
           final bool looged = snapshot.data;
           // return a widget here (you have to return a widget to the builder)
-          return looged ? SingIn() : Home();
+          return looged ? Home() :SingIn() ;
         });
   }
 }
